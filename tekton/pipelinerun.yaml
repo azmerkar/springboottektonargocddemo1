@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: clone-spring-boot-
+spec:
+  pipelineRef:
+    name: clone-spring-boot
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
+  workspaces:
+    - name: shared-data
+      emptyDir: {}
+  params:
+    - name: repo-url 
+      value: https://github.com/azmerkar/springboottektonargocddemo1.git     
+        
