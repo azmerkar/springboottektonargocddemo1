@@ -1,0 +1,74 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: springboot-build-image-dockerfile
+spec:
+  description: |
+     This pipeline clone a spring-boot git repo
+  params: 
+  - name: repo-url
+    type: string 
+    description: The git repo URL to clone from
+  - name: registry 
+    type: string
+  - name: user
+    type: string 
+    description: user for image-registry
+  - name: pass
+    type: string 
+    description: pass for docker-reg
+  - name: image-name
+    type: string 
+    description: image name
+     
+
+  workspaces:
+    - name: shared-workspace
+    - name: maven-settings
+    - name: maven-local-m2       
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: git-clone 
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url 
+          value: $(params.repo-url)
+
+    - name: maven-clean-package
+      runAfter:
+        - fetch-source 
+      taskRef:
+        name: maven 
+      params:
+        - name: GOALS
+          value:
+            - -DskipTests
+            - clean
+            - package
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: maven-local-repo
+          workspace: maven-local-m2
+        - name: source
+          workspace: shared-workspace
+
+
+    - name: build-and-deploy       
+      runAfter:
+        - maven-clean-package 
+      taskRef:
+        name: s2i-spring-boot
+      params: 
+      - name: user 
+        value: "$(params.user)"  
+      - name: pass  
+        value: "$(params.pass)"
+      - name: image-name  
+        value: "$(params.image-name)"     
+      workspaces:
+        - name: mehmet  
+          workspace: shared-workspace

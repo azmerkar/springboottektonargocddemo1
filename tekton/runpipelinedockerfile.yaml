@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: springboot-pipeline-dockerfile-
+spec:
+  pipelineRef:
+    name: springboot-build-image-dockerfile
+  podTemplate:
+    securityContext:
+      fsGroup: 65532
+  workspaces:
+    - name: maven-settings
+      emptyDir: {}
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 0.2Gi
+    - name: maven-local-m2
+      emptyDir: {}
+
+  params:
+    - name: repo-url 
+      value: https://github.com/azmerkar/springboottektonargocddemo1.git
+    - name: user 
+      value: mekar43
+    - name: pass 
+      value: Hm150712.
+    - name: image-name 
+      value: mehmetspringboot
+    - name: registry
+      value: "docker.io"
+        
+
+      

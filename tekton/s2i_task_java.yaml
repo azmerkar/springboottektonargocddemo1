@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: s2i-java
+  name: s2i-spring-boot
 spec:
   workspaces:
     - name: mehmet
@@ -26,42 +26,27 @@ spec:
          ls -al
          ls -al $(workspaces.mehmet.path) 
 
-
-    - name: generate
-      image: quay.io/openshift-pipeline/s2i:nightly
-      workingDir: $(workspaces.mehmet.path)
-      command: ["s2i", "build", ".", "adoptopenjdk/openjdk17:ubi", "--as-dockerfile", "/gensource/Dockerfile.gen"]
-      volumeMounts:
-        - mountPath: /gensource
-          name: gensource
-
-
     - name: build
       image: quay.io/buildah/stable
-      workingDir: /gensource
-      command: ["buildah", "bud", "--tls-verify=false", "--layers", "-t", "$(params.registry)/$(params.user)/$(params.image-name)", "/gensource/Dockerfile.gen"]
+      workingDir: "$(workspaces.mehmet.path)"
+      command: ["buildah", "bud", "--tls-verify=false", "--layers", "-t", "$(params.registry)/$(params.user)/$(params.image-name)", "Dockerfile"]
       securityContext:
         privileged: true
       volumeMounts:
       - name: varlibcontainers
         mountPath: /var/lib/containers
-      - mountPath: /gensource
-        name: gensource      
+     
 
 
-  #   - name: push
-  #     image: quay.io/buildah/stable
-  #     workingDir: "$(workspaces.mehmet.path)"
-  #     command: ['buildah', 'push', '--creds=$(params.user):$(params.pass)', '--tls-verify=false', '$(params.registry)/$(params.user)/$(params.image-name)', 'docker://$(params.registry)/$(params.user)/$(params.image-name)']
-  #     securityContext:
-  #       privileged: true
-  # #     volumeMounts:
-  #       - name: varlibcontainers
-  #         mountPath: /var/lib/containers
-  #       - name: gensource
-  #         mountPath: /gensource
+    - name: push
+      image: quay.io/buildah/stable
+      workingDir: "$(workspaces.mehmet.path)"
+      command: ['buildah', 'push', '--creds=$(params.user):$(params.pass)', '--tls-verify=false', '$(params.registry)/$(params.user)/$(params.image-name)', 'docker://$(params.registry)/$(params.user)/$(params.image-name)']
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: varlibcontainers
+          mountPath: /var/lib/containers
   volumes:
     - name: varlibcontainers
-      emptyDir: {}
-    - name: gensource
       emptyDir: {}
