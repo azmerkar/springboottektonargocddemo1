@@ -1,13 +1,8 @@
-# Runtime Stage: OpenJDK ile uygulama çalıştırılır
-FROM openjdk:11-jre-slim
-WORKDIR /app
+FROM docker.io/library/openjdk:11-jre-slim
 
-# Build edilen artifact'in kopyalanması
-# Tekton pipeline'daki build adımından gelen JAR dosyasını buraya kopyalayacağız.
+# Copy artifact from Maven build
 COPY target/demo-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose Spring Boot'un default portu
-EXPOSE 8080
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app.jar"]
 
-# Spring Boot uygulamasını başlat
-ENTRYPOINT ["java", "-jar", "app.jar"]
