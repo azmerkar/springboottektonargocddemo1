@@ -4,11 +4,21 @@ metadata:
   name: clone-spring-boot
 spec:
   description: |
-     This pipeline clone a sprring-boot git repo
+     This pipeline clone a spring-boot git repo
   params: 
   - name: repo-url
     type: string 
     description: The git repo URL to clone from
+  - name: user
+    type: string 
+    description: user for image-registry
+  - name: pass
+    type: string 
+    description: pass for docker-reg
+  - name: image-name 
+    type: string 
+    description: image-name for build
+
   workspaces:
     - name: shared-data 
       description: |
@@ -23,3 +33,19 @@ spec:
       params:
         - name: url 
           value: $(params.repo-url)
+  
+    - name: build-and-deploy
+      runAfter:
+        - fetch-source 
+      taskRef:
+        name: s2i-java
+      params:
+        - name: user 
+          value: $(params.user)
+        - name: pass 
+          value: $(params.pass) 
+        - name: image-name 
+          value: $(params.image-name)
+      workspaces:
+        - name: mehmet 
+          workspace: shared-data

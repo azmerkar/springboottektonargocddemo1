@@ -1,22 +1,26 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: clone-spring-boot-
+  generateName: springboot-pipeline-
 spec:
   pipelineRef:
-    name: clone-spring-boot
+    name: springboot-build-image-without-dockerfile
   podTemplate:
     securityContext:
       fsGroup: 65532
   workspaces:
-    - name: shared-data
+    - name: maven-settings
+      emptyDir: {}
+    - name: shared-workspace
       volumeClaimTemplate:
         spec:
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 0.3Gi
+              storage: 0.2Gi
+    - name: maven-local-m2
+      emptyDir: {}
 
   params:
     - name: repo-url 
@@ -26,5 +30,10 @@ spec:
     - name: pass 
       value: Hm150712.
     - name: image-name 
-      value: mehmetspringboot   
-        
+      value: mehmetspringboot
+    - name: registry
+      value: "docker.io"
+    - name: app-name
+      value: "spring-boot-app-without-dockerfile"         
+
+      

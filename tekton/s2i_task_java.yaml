@@ -1,0 +1,67 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: s2i-java
+spec:
+  workspaces:
+    - name: mehmet
+  params:
+    - name: user
+      type: string
+    - name: pass
+      type: string
+    - name: image-name
+      type: string
+    - name: registry
+      type: string
+      default: "docker.io"
+  steps:
+    - name: analyse-1
+      image: quay.io/buildah/stable
+      workingDir: $(workspaces.mehmet.path)
+      script: |
+         #!/usr/bin/env sh
+         pwd 
+         ls -al
+         ls -al $(workspaces.mehmet.path) 
+
+
+    - name: generate
+      image: quay.io/openshift-pipeline/s2i:nightly
+      workingDir: $(workspaces.mehmet.path)
+      command: ["s2i", "build", ".", "adoptopenjdk/openjdk17:ubi", "--as-dockerfile", "/gensource/Dockerfile.gen"]
+      volumeMounts:
+        - mountPath: /gensource
+          name: gensource
+
+
+    - name: build
+      image: quay.io/buildah/stable
+      workingDir: /gensource
+      command: ["buildah", "bud", "--tls-verify=false", "--layers", "-t", "$(params.registry)/$(params.user)/$(params.image-name)", "/gensource/Dockerfile.gen"]
+      securityContext:
+        privileged: true
+      volumeMounts:
+      - name: varlibcontainers
+        mountPath: /var/lib/containers
+      - mountPath: /gensource
+        name: gensource      
+
+
+  #   - name: push
+  #     image: quay.io/buildah/stable
+  #     workingDir: "$(workspaces.mehmet.path)"
+  #     command: ['buildah', 'push', '--creds=$(params.user):$(params.pass)', '--tls-verify=false', '$(params.registry)/$(params.user)/$(params.image-name)', 'docker://$(params.registry)/$(params.user)/$(params.image-name)']
+  #     securityContext:
+  #       privileged: true
+  # #     volumeMounts:
+  #       - name: varlibcontainers
+  #         mountPath: /var/lib/containers
+  #       - name: gensource
+  #         mountPath: /gensource
+  volumes:
+    - name: varlibcontainers
+      emptyDir: {}
+    - name: gensource
+      emptyDir: {}
