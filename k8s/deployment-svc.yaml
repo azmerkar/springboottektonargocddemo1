@@ -32,6 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mehmetspringboot-service
+  namespace: mehmet 
   labels:
     app: mehmetspringboot
 spec:
