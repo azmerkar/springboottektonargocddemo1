@@ -9,8 +9,8 @@ spec:
   params:
     - name: user
       type: string
-    - name: pass
-      type: string
+    # - name: pass
+    #   type: string
     - name: image-name
       type: string
     - name: registry
@@ -37,11 +37,11 @@ spec:
         mountPath: /var/lib/containers
      
 
-
+# '--creds=$(params.user):$(params.pass)',
     - name: push
       image: quay.io/buildah/stable
       workingDir: "$(workspaces.mehmet.path)"
-      command: ['buildah', 'push', '--creds=$(params.user):$(params.pass)', '--tls-verify=false', '$(params.registry)/$(params.user)/$(params.image-name)', 'docker://$(params.registry)/$(params.user)/$(params.image-name)']
+      command: ['buildah', 'push',  '--tls-verify=false', '$(params.registry)/$(params.user)/$(params.image-name)', 'docker://$(params.registry)/$(params.user)/$(params.image-name)']
       securityContext:
         privileged: true
       volumeMounts:

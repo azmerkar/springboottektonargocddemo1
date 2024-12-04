@@ -3,11 +3,14 @@ kind: PipelineRun
 metadata:
   generateName: springboot-pipeline-dockerfile-
 spec:
+  serviceAccountName: build-bot
   pipelineRef:
     name: springboot-build-image-dockerfile
   podTemplate:
     securityContext:
       fsGroup: 65532
+    # imagePullSecrets:
+    #   - name: docker-authentication      
   workspaces:
     - name: maven-settings
       emptyDir: {}
@@ -25,14 +28,12 @@ spec:
   params:
     - name: repo-url 
       value: https://github.com/azmerkar/springboottektonargocddemo1.git
-    - name: user 
-      value: mekar43
-    - name: pass 
-      value: Hm150712.
     - name: image-name 
       value: mehmetspringboot
     - name: registry
       value: "docker.io"
+    - name: user
+      value: mekar43
         
 
       

@@ -14,9 +14,9 @@ spec:
   - name: user
     type: string 
     description: user for image-registry
-  - name: pass
-    type: string 
-    description: pass for docker-reg
+  # - name: pass
+  #   type: string 
+  #   description: pass for docker-reg
   - name: image-name
     type: string 
     description: image name
@@ -65,8 +65,8 @@ spec:
       params: 
       - name: user 
         value: "$(params.user)"  
-      - name: pass  
-        value: "$(params.pass)"
+      # - name: pass  
+      #   value: "$(params.pass)"
       - name: image-name  
         value: "$(params.image-name)"     
       workspaces:
